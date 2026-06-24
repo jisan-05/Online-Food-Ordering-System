@@ -15,11 +15,16 @@ export async function createJwtToken(req, res, next) {
       { new: true, setDefaultsOnInsert: true, upsert: true },
     )
 
+    if (user.status === 'banned') {
+      return res.status(403).json({ message: 'This account has been banned' })
+    }
+
     const token = jwt.sign(
       {
         uid: user.firebaseUid,
         email: user.email,
         role: user.role,
+        status: user.status,
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' },

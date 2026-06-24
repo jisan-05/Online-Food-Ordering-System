@@ -34,6 +34,7 @@ export async function placeOrder(req, res, next) {
       totalPrice,
       orderStatus: req.body.orderStatus || 'pending',
       paymentStatus: req.body.paymentStatus || 'unpaid',
+      deliveryDetails: req.body.deliveryDetails,
     })
 
     await Cart.deleteMany({ userUid: req.user.uid })

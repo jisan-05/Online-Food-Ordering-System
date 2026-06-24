@@ -29,8 +29,14 @@ function ManageOrdersPage() {
         <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-950">Restaurant Orders</h1>
       </div>
 
-      <div className="grid gap-4">
-        {orders.map((order) => (
+      {orders.length === 0 ? (
+        <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+          <h2 className="text-2xl font-black text-slate-950">No orders yet</h2>
+          <p className="mt-3 text-slate-600">Incoming customer orders will appear here.</p>
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {orders.map((order) => (
           <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm" key={order._id}>
             <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
               <div>
@@ -68,8 +74,9 @@ function ManageOrdersPage() {
               </div>
             </div>
           </article>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

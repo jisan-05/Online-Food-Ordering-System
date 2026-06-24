@@ -5,6 +5,11 @@ export async function requestJwtToken(user) {
   return data.token
 }
 
+export async function getCurrentUser() {
+  const { data } = await api.get('/auth/me')
+  return data.user
+}
+
 export function setAuthToken(token) {
   localStorage.setItem('accessToken', token)
 }

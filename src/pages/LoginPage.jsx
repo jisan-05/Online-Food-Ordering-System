@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { LockKeyhole, Mail, Send } from 'lucide-react'
 import useAuth from '../hooks/useAuth'
+import { getRoleHome } from '../utils/roles'
 
 function LoginPage() {
   const { login, loginWithGoogle } = useAuth()
@@ -11,7 +12,7 @@ function LoginPage() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  const redirectTo = location.state?.from?.pathname || '/profile'
+  const redirectTo = location.state?.from?.pathname || '/dashboard'
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -19,8 +20,8 @@ function LoginPage() {
     setSubmitting(true)
 
     try {
-      await login(form.email, form.password)
-      navigate(redirectTo, { replace: true })
+      const currentUser = await login(form.email, form.password)
+      navigate(location.state?.from?.pathname || getRoleHome(currentUser?.role), { replace: true })
     } catch (authError) {
       setError(authError.message)
     } finally {
@@ -33,8 +34,8 @@ function LoginPage() {
     setSubmitting(true)
 
     try {
-      await loginWithGoogle()
-      navigate(redirectTo, { replace: true })
+      const currentUser = await loginWithGoogle()
+      navigate(location.state?.from?.pathname || getRoleHome(currentUser?.role), { replace: true })
     } catch (authError) {
       setError(authError.message)
     } finally {

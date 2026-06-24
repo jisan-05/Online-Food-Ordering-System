@@ -22,6 +22,68 @@ export async function getAdminStats(_req, res, next) {
   }
 }
 
+export async function getAdminAnalytics(_req, res, next) {
+  try {
+    const [monthlyRevenue, ordersPerMonth, userGrowth, foodCategories] = await Promise.all([
+      Order.aggregate([
+        {
+          $group: {
+            _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
+            revenue: { $sum: '$totalPrice' },
+          },
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1 } },
+      ]),
+      Order.aggregate([
+        {
+          $group: {
+            _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
+            orders: { $sum: 1 },
+          },
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1 } },
+      ]),
+      User.aggregate([
+        {
+          $group: {
+            _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
+            users: { $sum: 1 },
+          },
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1 } },
+      ]),
+      Food.aggregate([
+        {
+          $group: {
+            _id: '$category',
+            foods: { $sum: 1 },
+          },
+        },
+        { $sort: { foods: -1 } },
+      ]),
+    ])
+
+    function formatMonthly(items, valueKey) {
+      return items.map((item) => ({
+        month: `${item._id.year}-${String(item._id.month).padStart(2, '0')}`,
+        [valueKey]: item[valueKey],
+      }))
+    }
+
+    return res.status(200).json({
+      monthlyRevenue: formatMonthly(monthlyRevenue, 'revenue'),
+      ordersPerMonth: formatMonthly(ordersPerMonth, 'orders'),
+      userGrowth: formatMonthly(userGrowth, 'users'),
+      foodCategories: foodCategories.map((item) => ({
+        category: item._id || 'Uncategorized',
+        foods: item.foods,
+      })),
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
+
 export async function getUsers(_req, res, next) {
   try {
     const users = await User.find().sort({ createdAt: -1 })
@@ -36,7 +98,7 @@ export async function updateUserAdmin(req, res, next) {
   try {
     const { role } = req.body
 
-    if (!['customer', 'admin'].includes(role)) {
+    if (!['customer', 'owner', 'admin'].includes(role)) {
       return res.status(400).json({ message: 'Invalid user role' })
     }
 

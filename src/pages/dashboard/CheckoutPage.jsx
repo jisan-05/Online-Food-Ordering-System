@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2, CreditCard, MapPin, ShoppingBag } from 'lucide-react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import { getCart } from '../../services/cartService'
@@ -8,6 +9,7 @@ import { placeOrder } from '../../services/orderService'
 function CheckoutPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const [deliveryDetails, setDeliveryDetails] = useState({ name: '', phone: '', address: '' })
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['cart'],
     queryFn: getCart,
@@ -35,6 +37,7 @@ function CheckoutPage() {
 
   const items = data?.items || []
   const summary = data?.summary || { totalItems: 0, totalPrice: 0 }
+  const isDeliveryComplete = Object.values(deliveryDetails).every((value) => value.trim().length > 1)
 
   if (!items.length) {
     return (
@@ -59,7 +62,13 @@ function CheckoutPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
+      <form
+        className="grid gap-6 xl:grid-cols-[1fr_360px]"
+        onSubmit={(event) => {
+          event.preventDefault()
+          orderMutation.mutate({ deliveryDetails, paymentStatus: 'unpaid' })
+        }}
+      >
         <div className="grid gap-4">
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="flex items-center gap-2 text-xl font-black text-slate-950">
@@ -67,9 +76,37 @@ function CheckoutPage() {
               Delivery Details
             </h2>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <input className="min-h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-bold outline-none focus:border-orange-300" placeholder="Full name" />
-              <input className="min-h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-bold outline-none focus:border-orange-300" placeholder="Phone number" />
-              <input className="min-h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-bold outline-none focus:border-orange-300 md:col-span-2" placeholder="Delivery address" />
+              <label className="grid gap-2 text-sm font-bold text-slate-700">
+                Full name
+                <input
+                  className="min-h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-bold outline-none focus:border-orange-300"
+                  onChange={(event) => setDeliveryDetails((current) => ({ ...current, name: event.target.value }))}
+                  placeholder="Full name"
+                  required
+                  value={deliveryDetails.name}
+                />
+              </label>
+              <label className="grid gap-2 text-sm font-bold text-slate-700">
+                Phone number
+                <input
+                  className="min-h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-bold outline-none focus:border-orange-300"
+                  onChange={(event) => setDeliveryDetails((current) => ({ ...current, phone: event.target.value }))}
+                  placeholder="Phone number"
+                  required
+                  type="tel"
+                  value={deliveryDetails.phone}
+                />
+              </label>
+              <label className="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
+                Delivery address
+                <input
+                  className="min-h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-bold outline-none focus:border-orange-300"
+                  onChange={(event) => setDeliveryDetails((current) => ({ ...current, address: event.target.value }))}
+                  placeholder="Delivery address"
+                  required
+                  value={deliveryDetails.address}
+                />
+              </label>
             </div>
           </div>
 
@@ -124,14 +161,14 @@ function CheckoutPage() {
           )}
           <button
             className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 px-5 py-4 font-black text-white shadow-lg shadow-orange-500/25 transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={orderMutation.isPending}
-            onClick={() => orderMutation.mutate({ paymentStatus: 'unpaid' })}
+            disabled={orderMutation.isPending || !isDeliveryComplete}
+            type="submit"
           >
             <CheckCircle2 size={19} />
             {orderMutation.isPending ? 'Placing Order...' : 'Place Order'}
           </button>
         </aside>
-      </div>
+      </form>
     </div>
   )
 }

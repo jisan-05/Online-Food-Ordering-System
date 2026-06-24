@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { LockKeyhole, Mail, Send, UserRound } from 'lucide-react'
 import useAuth from '../hooks/useAuth'
+import { getRoleHome } from '../utils/roles'
 
 function RegisterPage() {
   const { register, loginWithGoogle } = useAuth()
@@ -16,8 +17,8 @@ function RegisterPage() {
     setSubmitting(true)
 
     try {
-      await register(form)
-      navigate('/profile', { replace: true })
+      const currentUser = await register(form)
+      navigate(getRoleHome(currentUser?.role), { replace: true })
     } catch (authError) {
       setError(authError.message)
     } finally {
@@ -30,8 +31,8 @@ function RegisterPage() {
     setSubmitting(true)
 
     try {
-      await loginWithGoogle()
-      navigate('/profile', { replace: true })
+      const currentUser = await loginWithGoogle()
+      navigate(getRoleHome(currentUser?.role), { replace: true })
     } catch (authError) {
       setError(authError.message)
     } finally {

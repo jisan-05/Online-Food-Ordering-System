@@ -46,8 +46,14 @@ function ManageFoodsPage() {
         <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-950">Menu Inventory</h1>
       </div>
 
-      <div className="grid gap-4">
-        {data.foods.map((food) => (
+      {data.foods.length === 0 ? (
+        <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+          <h2 className="text-2xl font-black text-slate-950">No foods yet</h2>
+          <p className="mt-3 text-slate-600">Add your first menu item to start managing inventory.</p>
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {data.foods.map((food) => (
           <article className="grid gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm lg:grid-cols-[96px_1fr_auto]" key={food._id}>
             <img className="size-24 rounded-2xl object-cover" src={food.image} alt={food.name} />
             <div>
@@ -67,8 +73,9 @@ function ManageFoodsPage() {
               </button>
             </div>
           </article>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {editingFood && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4">

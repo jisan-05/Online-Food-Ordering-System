@@ -1,9 +1,31 @@
+import { Link } from 'react-router-dom'
 import { Mail, MapPin, MessageCircle, Phone, Send, Share2, Utensils } from 'lucide-react'
 
 const footerLinks = [
-  ['Company', ['About', 'Careers', 'Partner with us', 'Press']],
-  ['Support', ['Help center', 'Delivery areas', 'Refund policy', 'Contact']],
-  ['Popular', ['Pizza delivery', 'Burger deals', 'Healthy meals', 'Late-night food']],
+  [
+    'Explore',
+    [
+      { label: 'Home', to: '/' },
+      { label: 'Browse foods', to: '/foods' },
+      { label: 'Customer dashboard', to: '/dashboard' },
+    ],
+  ],
+  [
+    'Account',
+    [
+      { label: 'Login', to: '/login' },
+      { label: 'Register', to: '/register' },
+      { label: 'My orders', to: '/dashboard/orders' },
+    ],
+  ],
+  [
+    'Popular',
+    [
+      { label: 'Pizza delivery', to: '/foods?category=Pizza' },
+      { label: 'Burger deals', to: '/foods?category=Burger' },
+      { label: 'Healthy meals', to: '/foods?category=Healthy' },
+    ],
+  ],
 ]
 
 function Footer() {
@@ -17,16 +39,24 @@ function Footer() {
             </div>
             <div>
               <p className="text-lg font-black tracking-tight">CraveHub</p>
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-300">Food Platform</p>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-300">
+                Food Platform
+              </p>
             </div>
           </div>
           <p className="mt-5 max-w-sm leading-7 text-slate-300">
-            A modern online food ordering system for restaurants, customers, riders, and administrators.
+            A modern online food ordering system for customers, restaurants, and platform teams.
           </p>
           <div className="mt-6 grid gap-3 text-sm font-bold text-slate-300">
-            <span className="inline-flex items-center gap-2"><Phone size={16} /> +1 (555) 240-8812</span>
-            <span className="inline-flex items-center gap-2"><Mail size={16} /> hello@cravehub.com</span>
-            <span className="inline-flex items-center gap-2"><MapPin size={16} /> 88 Market Street, New York</span>
+            <span className="inline-flex items-center gap-2">
+              <Phone size={16} /> +1 (555) 240-8812
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <Mail size={16} /> hello@cravehub.com
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <MapPin size={16} /> 88 Market Street, New York
+            </span>
           </div>
         </div>
 
@@ -36,9 +66,13 @@ function Footer() {
               <h3 className="font-black">{title}</h3>
               <div className="mt-4 grid gap-3">
                 {links.map((link) => (
-                  <a className="text-sm font-bold text-slate-300 transition hover:text-orange-300" href="/" key={link}>
-                    {link}
-                  </a>
+                  <Link
+                    className="text-sm font-bold text-slate-300 transition hover:text-orange-300"
+                    key={link.label}
+                    to={link.to}
+                  >
+                    {link.label}
+                  </Link>
                 ))}
               </div>
             </div>
@@ -48,10 +82,17 @@ function Footer() {
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
-          <p className="text-sm font-bold text-slate-400">© 2026 CraveHub. All rights reserved.</p>
+          <p className="text-sm font-bold text-slate-400">
+            Copyright 2026 CraveHub. All rights reserved.
+          </p>
           <div className="flex gap-2">
             {[MessageCircle, Send, Share2].map((Icon) => (
-              <a className="grid size-10 place-items-center rounded-full border border-white/10 text-slate-300 transition hover:border-orange-300 hover:text-orange-300" href="/" key={Icon.displayName || Icon.name}>
+              <a
+                aria-label={Icon.displayName || Icon.name}
+                className="grid size-10 place-items-center rounded-full border border-white/10 text-slate-300 transition hover:border-orange-300 hover:text-orange-300"
+                href="/"
+                key={Icon.displayName || Icon.name}
+              >
                 <Icon size={18} />
               </a>
             ))}

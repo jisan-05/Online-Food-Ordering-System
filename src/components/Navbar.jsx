@@ -1,7 +1,9 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, NavLink } from 'react-router-dom'
-import { LogOut, Menu, ShieldCheck, Utensils, X } from 'lucide-react'
+import { LogOut, Menu, ShieldCheck, ShoppingCart, Utensils, X } from 'lucide-react'
 import { useState } from 'react'
 import useAuth from '../hooks/useAuth'
+import { getCart } from '../services/cartService'
 
 const linkClass = ({ isActive }) =>
   `rounded-full px-4 py-2 text-sm font-bold transition ${
@@ -10,24 +12,69 @@ const linkClass = ({ isActive }) =>
 
 function Navbar() {
   const [open, setOpen] = useState(false)
-  const { user, logout } = useAuth()
+  const queryClient = useQueryClient()
+  const { appUser, user, logout } = useAuth()
+  const canManageRestaurant = appUser?.role === 'owner' || appUser?.role === 'admin'
+  const canManageAdmin = appUser?.role === 'admin'
+  const { data: cart } = useQuery({
+    queryKey: ['cart'],
+    queryFn: getCart,
+    enabled: Boolean(user),
+  })
+  const cartCount = cart?.summary?.totalItems || 0
 
-  const nav = (
+  function handleLogout() {
+    logout()
+    queryClient.removeQueries({ queryKey: ['cart'] })
+    setOpen(false)
+  }
+
+  const cartLink = (onNavigate, compact = false) =>
+    user ? (
+      <NavLink
+        aria-label={`Cart with ${cartCount} item${cartCount === 1 ? '' : 's'}`}
+        className={({ isActive }) =>
+          `relative inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition ${
+            isActive ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:bg-slate-100'
+          } ${compact ? 'justify-between rounded-2xl px-4 py-3' : ''}`
+        }
+        onClick={onNavigate}
+        to="/dashboard/cart"
+      >
+        <span className="inline-flex items-center gap-2">
+          <ShoppingCart size={17} />
+          Cart
+        </span>
+        <span className="grid min-w-5 place-items-center rounded-full bg-orange-500 px-1.5 text-xs font-black leading-5 text-white">
+          {cartCount}
+        </span>
+      </NavLink>
+    ) : null
+
+  const nav = (onNavigate) => (
     <>
-      <NavLink className={linkClass} to="/">
+      <NavLink className={linkClass} onClick={onNavigate} to="/">
         Home
       </NavLink>
-      <NavLink className={linkClass} to="/foods">
+      <NavLink className={linkClass} onClick={onNavigate} to="/foods">
         Foods
       </NavLink>
       {user && (
         <>
-          <NavLink className={linkClass} to="/dashboard">
+          <NavLink className={linkClass} onClick={onNavigate} to="/dashboard">
             Dashboard
           </NavLink>
-          <NavLink className={linkClass} to="/owner">
-            Owner
-          </NavLink>
+          {cartLink(onNavigate)}
+          {canManageRestaurant && (
+            <NavLink className={linkClass} onClick={onNavigate} to="/owner">
+              Owner
+            </NavLink>
+          )}
+          {canManageAdmin && (
+            <NavLink className={linkClass} onClick={onNavigate} to="/admin">
+              Admin
+            </NavLink>
+          )}
         </>
       )}
     </>
@@ -49,7 +96,7 @@ function Navbar() {
         </Link>
 
         <nav className="hidden items-center gap-1 rounded-full border border-slate-200 bg-white p-1 shadow-sm md:flex">
-          {nav}
+          {nav()}
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
@@ -61,7 +108,7 @@ function Navbar() {
               </span>
               <button
                 className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2 text-sm font-bold text-white transition hover:bg-orange-600"
-                onClick={logout}
+                onClick={handleLogout}
               >
                 <LogOut size={16} />
                 Logout
@@ -90,14 +137,16 @@ function Navbar() {
       {open && (
         <div className="border-t border-slate-200 bg-white px-4 py-4 md:hidden">
           <div className="grid gap-2">
-            {nav}
+            {nav(() => setOpen(false))}
             {user ? (
-              <button
-                className="rounded-2xl bg-slate-950 px-4 py-3 text-left text-sm font-bold text-white"
-                onClick={logout}
-              >
-                Logout
-              </button>
+              <>
+                <button
+                  className="rounded-2xl bg-slate-950 px-4 py-3 text-left text-sm font-bold text-white"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </button>
+              </>
             ) : (
               <>
                 <Link className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100" to="/login">
