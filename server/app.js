@@ -10,7 +10,7 @@ import errorHandler from './middleware/errorHandler.js'
 
 const app = express()
 const allowedOrigins = [
-  process.env.CLIENT_URL,
+  ...(process.env.CLIENT_URL || '').split(',').map((origin) => origin.trim()),
   'http://localhost:5173',
   'http://127.0.0.1:5173',
 ].filter(Boolean)
@@ -29,6 +29,14 @@ app.use(
 )
 app.use(express.json())
 app.use(cookieParser())
+
+app.get('/', (_req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    service: 'CraveHub API',
+    health: '/api/health',
+  })
+})
 
 app.get('/api/health', (_req, res) => {
   res.status(200).json({ status: 'ok', service: 'CraveHub API' })

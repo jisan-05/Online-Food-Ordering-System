@@ -12,8 +12,6 @@ function LoginPage() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  const redirectTo = location.state?.from?.pathname || '/dashboard'
-
   const handleSubmit = async (event) => {
     event.preventDefault()
     setError('')

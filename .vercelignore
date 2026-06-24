@@ -1,0 +1,6 @@
+dist
+src
+public
+index.html
+vite.config.js
+netlify.toml
