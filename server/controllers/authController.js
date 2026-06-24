@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
+import { getJwtExpiresIn, getJwtSecret } from '../config/jwt.js'
 
 export async function createJwtToken(req, res, next) {
   try {
@@ -26,8 +27,8 @@ export async function createJwtToken(req, res, next) {
         role: user.role,
         status: user.status,
       },
-      process.env.JWT_SECRET?.trim(),
-      { expiresIn: (process.env.JWT_EXPIRES_IN || '7d').trim() },
+      getJwtSecret(),
+      { expiresIn: getJwtExpiresIn() },
     )
 
     return res.status(200).json({ token })

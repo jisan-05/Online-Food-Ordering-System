@@ -23,6 +23,18 @@ app.use(
         return callback(null, true)
       }
 
+      try {
+        const { hostname } = new URL(origin)
+        const isNetlifyPreview = hostname.endsWith('.netlify.app')
+        const isVercelPreview = hostname.endsWith('.vercel.app')
+
+        if (isNetlifyPreview || isVercelPreview) {
+          return callback(null, true)
+        }
+      } catch {
+        // ignore invalid origin URLs
+      }
+
       return callback(new Error('Not allowed by CORS'))
     },
     credentials: true,

@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
+import { getJwtSecret } from '../config/jwt.js'
 
 async function verifyJwt(req, res, next) {
   const authHeader = req.headers.authorization
@@ -11,7 +12,7 @@ async function verifyJwt(req, res, next) {
   const token = authHeader.split(' ')[1]
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const decoded = jwt.verify(token, getJwtSecret())
     const user = await User.findOne({ firebaseUid: decoded.uid })
 
     if (!user) {
