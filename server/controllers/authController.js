@@ -26,8 +26,8 @@ export async function createJwtToken(req, res, next) {
         role: user.role,
         status: user.status,
       },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' },
+      process.env.JWT_SECRET?.trim(),
+      { expiresIn: (process.env.JWT_EXPIRES_IN || '7d').trim() },
     )
 
     return res.status(200).json({ token })
