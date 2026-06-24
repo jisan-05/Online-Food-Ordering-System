@@ -1,6 +1,7 @@
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express from 'express'
+import connectDB from './config/db.js'
 import adminRoutes from './routes/adminRoutes.js'
 import authRoutes from './routes/authRoutes.js'
 import cartRoutes from './routes/cartRoutes.js'
@@ -29,6 +30,15 @@ app.use(
 )
 app.use(express.json())
 app.use(cookieParser())
+
+app.use(async (req, res, next) => {
+  try {
+    await connectDB()
+    next()
+  } catch (error) {
+    next(error)
+  }
+})
 
 app.get('/', (_req, res) => {
   res.status(200).json({
