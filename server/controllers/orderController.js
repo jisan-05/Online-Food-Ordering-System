@@ -32,8 +32,8 @@ export async function placeOrder(req, res, next) {
       userEmail: req.user.email,
       foods,
       totalPrice,
-      orderStatus: req.body.orderStatus || 'pending',
-      paymentStatus: req.body.paymentStatus || 'unpaid',
+      orderStatus: 'pending',
+      paymentStatus: 'unpaid',
       deliveryDetails: req.body.deliveryDetails,
     })
 
@@ -82,55 +82,6 @@ export async function getOrderById(req, res, next) {
     }
 
     return res.status(200).json({ order })
-  } catch (error) {
-    return next(error)
-  }
-}
-
-export async function updateOrderStatus(req, res, next) {
-  try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ message: 'Invalid order id' })
-    }
-
-    const payload = {}
-
-    if (req.body.orderStatus !== undefined) {
-      if (!orderStatuses.includes(req.body.orderStatus)) {
-        return res.status(400).json({ message: 'Invalid order status' })
-      }
-
-      payload.orderStatus = req.body.orderStatus
-    }
-
-    if (req.body.paymentStatus !== undefined) {
-      if (!paymentStatuses.includes(req.body.paymentStatus)) {
-        return res.status(400).json({ message: 'Invalid payment status' })
-      }
-
-      payload.paymentStatus = req.body.paymentStatus
-    }
-
-    if (!Object.keys(payload).length) {
-      return res.status(400).json({ message: 'No status field provided' })
-    }
-
-    const existingOrder = await Order.findById(req.params.id)
-
-    if (!existingOrder) {
-      return res.status(404).json({ message: 'Order not found' })
-    }
-
-    if (!canAccessOrder(req, existingOrder)) {
-      return res.status(403).json({ message: 'Forbidden order access' })
-    }
-
-    const order = await Order.findByIdAndUpdate(req.params.id, payload, {
-      new: true,
-      runValidators: true,
-    })
-
-    return res.status(200).json({ message: 'Order status updated', order })
   } catch (error) {
     return next(error)
   }

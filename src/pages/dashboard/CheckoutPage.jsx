@@ -66,7 +66,7 @@ function CheckoutPage() {
         className="grid gap-6 xl:grid-cols-[1fr_360px]"
         onSubmit={(event) => {
           event.preventDefault()
-          orderMutation.mutate({ deliveryDetails, paymentStatus: 'unpaid' })
+          orderMutation.mutate({ deliveryDetails })
         }}
       >
         <div className="grid gap-4">

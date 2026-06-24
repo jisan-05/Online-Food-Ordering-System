@@ -67,6 +67,13 @@ function ManageOrdersPage() {
                     </option>
                   ))}
                 </select>
+                <select className="min-h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-black outline-none" disabled={mutation.isPending} onChange={(event) => mutation.mutate({ id: order._id, payload: { paymentStatus: event.target.value } })} value={order.paymentStatus}>
+                  {['unpaid', 'paid', 'failed', 'refunded'].map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
                 <button className="inline-flex items-center gap-2 rounded-2xl bg-cyan-50 px-4 py-3 text-sm font-black text-cyan-700 hover:bg-cyan-100" disabled={mutation.isPending} onClick={() => mutation.mutate({ id: order._id, payload: { orderStatus: 'delivering' } })}>
                   <Truck size={17} />
                   Out for Delivery

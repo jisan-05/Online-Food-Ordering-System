@@ -1,23 +1,22 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, CreditCard, PackageCheck, Truck } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import LoadingSpinner from '../../components/LoadingSpinner'
-import { getOrder, updateOrderStatus } from '../../services/orderService'
+import { getOrder } from '../../services/orderService'
+
+function statusBadgeClass(status) {
+  if (status === 'completed' || status === 'paid') return 'bg-emerald-50 text-emerald-700'
+  if (status === 'cancelled' || status === 'failed') return 'bg-rose-50 text-rose-700'
+  if (status === 'refunded') return 'bg-violet-50 text-violet-700'
+  return 'bg-orange-50 text-orange-700'
+}
 
 function OrderDetailsPage() {
   const { id } = useParams()
-  const queryClient = useQueryClient()
   const { data: order, isLoading, isError, error } = useQuery({
     queryKey: ['order', id],
     queryFn: () => getOrder(id),
     enabled: Boolean(id),
-  })
-  const statusMutation = useMutation({
-    mutationFn: (payload) => updateOrderStatus(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['order', id] })
-      queryClient.invalidateQueries({ queryKey: ['orders'] })
-    },
   })
 
   if (isLoading) {
@@ -76,30 +75,21 @@ function OrderDetailsPage() {
               Status
             </h2>
             <div className="mt-5 grid gap-3">
-              <select
-                className="min-h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-black outline-none"
-                disabled={statusMutation.isPending}
-                onChange={(event) => statusMutation.mutate({ orderStatus: event.target.value })}
-                value={order.orderStatus}
-              >
-                {['pending', 'confirmed', 'preparing', 'delivering', 'completed', 'cancelled'].map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="min-h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-black outline-none"
-                disabled={statusMutation.isPending}
-                onChange={(event) => statusMutation.mutate({ paymentStatus: event.target.value })}
-                value={order.paymentStatus}
-              >
-                {['unpaid', 'paid', 'failed', 'refunded'].map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
+              <div className="rounded-2xl bg-slate-50 p-4">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Order Status</p>
+                <span className={`mt-2 inline-flex rounded-full px-3 py-1 text-sm font-black uppercase ${statusBadgeClass(order.orderStatus)}`}>
+                  {order.orderStatus}
+                </span>
+              </div>
+              <div className="rounded-2xl bg-slate-50 p-4">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Payment Status</p>
+                <span className={`mt-2 inline-flex rounded-full px-3 py-1 text-sm font-black uppercase ${statusBadgeClass(order.paymentStatus)}`}>
+                  {order.paymentStatus}
+                </span>
+              </div>
+              <p className="text-sm font-bold text-slate-500">
+                Status updates are managed by the restaurant. You can track progress here.
+              </p>
             </div>
           </div>
 

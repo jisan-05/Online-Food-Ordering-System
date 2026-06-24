@@ -24,12 +24,6 @@ export async function getOrder(id) {
   return data.order
 }
 
-export async function updateOrderStatus(id, payload) {
-  const { data } = await api.patch(`/orders/${id}/status`, payload)
-
-  return data
-}
-
 export async function updateManagedOrderStatus(id, payload) {
   const { data } = await api.patch(`/orders/manage/${id}/status`, payload)
 
