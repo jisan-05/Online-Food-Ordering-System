@@ -7,7 +7,7 @@ const footerLinks = [
     [
       { label: 'Home', to: '/' },
       { label: 'Browse foods', to: '/foods' },
-      { label: 'Customer dashboard', to: '/dashboard' },
+      { label: 'Pizza delivery', to: '/foods?category=Pizza' },
     ],
   ],
   [
@@ -15,14 +15,14 @@ const footerLinks = [
     [
       { label: 'Login', to: '/login' },
       { label: 'Register', to: '/register' },
-      { label: 'My orders', to: '/dashboard/orders' },
+      { label: 'Profile', to: '/profile' },
     ],
   ],
   [
     'Popular',
     [
-      { label: 'Pizza delivery', to: '/foods?category=Pizza' },
       { label: 'Burger deals', to: '/foods?category=Burger' },
+      { label: 'Sushi picks', to: '/foods?category=Sushi' },
       { label: 'Healthy meals', to: '/foods?category=Healthy' },
     ],
   ],

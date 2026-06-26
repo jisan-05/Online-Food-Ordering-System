@@ -10,11 +10,12 @@ import {
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import useAuth from '../hooks/useAuth'
+import useCartDrawer from '../hooks/useCartDrawer'
 
 const dashboardLinks = [
   { label: 'Dashboard Home', to: '/dashboard', icon: LayoutDashboard, end: true },
   { label: 'My Profile', to: '/dashboard/profile', icon: UserRound },
-  { label: 'My Cart', to: '/dashboard/cart', icon: ShoppingCart },
+  { label: 'My Cart', icon: ShoppingCart, action: 'cart' },
   { label: 'My Orders', to: '/dashboard/orders', icon: ClipboardList },
   { label: 'Wishlist', to: '/dashboard/wishlist', icon: Heart },
 ]
@@ -28,6 +29,7 @@ const linkClass = ({ isActive }) =>
 
 function DashboardSidebar({ onNavigate }) {
   const { user } = useAuth()
+  const { openCart } = useCartDrawer()
 
   return (
     <aside className="flex h-full flex-col">
@@ -42,12 +44,27 @@ function DashboardSidebar({ onNavigate }) {
       </div>
 
       <nav className="grid gap-2 p-4">
-        {dashboardLinks.map(({ label, to, icon: Icon, end }) => (
-          <NavLink className={linkClass} end={end} key={to} onClick={onNavigate} to={to}>
-            <Icon size={19} />
-            {label}
-          </NavLink>
-        ))}
+        {dashboardLinks.map(({ label, to, icon: Icon, end, action }) =>
+          action === 'cart' ? (
+            <button
+              className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-black text-slate-600 transition hover:bg-orange-50 hover:text-orange-600"
+              key={label}
+              onClick={() => {
+                openCart()
+                onNavigate?.()
+              }}
+              type="button"
+            >
+              <Icon size={19} />
+              {label}
+            </button>
+          ) : (
+            <NavLink className={linkClass} end={end} key={to} onClick={onNavigate} to={to}>
+              <Icon size={19} />
+              {label}
+            </NavLink>
+          ),
+        )}
       </nav>
     </aside>
   )

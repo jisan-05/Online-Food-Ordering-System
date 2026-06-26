@@ -4,12 +4,15 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import LoadingSpinner from '../components/LoadingSpinner'
 import useAuth from '../hooks/useAuth'
+import useCartDrawer from '../hooks/useCartDrawer'
 import { addToCart } from '../services/cartService'
 import { getFood } from '../services/foodService'
+import { isCustomerRole } from '../utils/roles'
 
 function FoodDetailsPage() {
   const { id } = useParams()
-  const { user } = useAuth()
+  const { appUser, user } = useAuth()
+  const { openCart } = useCartDrawer()
   const location = useLocation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -21,7 +24,10 @@ function FoodDetailsPage() {
   })
   const addMutation = useMutation({
     mutationFn: addToCart,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cart'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cart'] })
+      openCart()
+    },
   })
 
   function handleAddToCart() {
@@ -32,6 +38,8 @@ function FoodDetailsPage() {
 
     addMutation.mutate({ foodId: food._id, quantity })
   }
+
+  const canAddToCart = !user || isCustomerRole(appUser?.role)
 
   if (isLoading) {
     return <LoadingSpinner label="Loading food details" />
@@ -89,32 +97,41 @@ function FoodDetailsPage() {
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <div className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-1 sm:w-40">
+          {canAddToCart ? (
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-1 sm:w-40">
+                <button
+                  className="grid size-11 place-items-center rounded-xl bg-white text-slate-700 shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+                  disabled={quantity <= 1}
+                  onClick={() => setQuantity((current) => Math.max(current - 1, 1))}
+                  type="button"
+                >
+                  <Minus size={17} />
+                </button>
+                <span className="font-black text-slate-950">{quantity}</span>
+                <button
+                  className="grid size-11 place-items-center rounded-xl bg-white text-slate-700 shadow-sm"
+                  onClick={() => setQuantity((current) => current + 1)}
+                  type="button"
+                >
+                  <Plus size={17} />
+                </button>
+              </div>
               <button
-                className="grid size-11 place-items-center rounded-xl bg-white text-slate-700 shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
-                disabled={quantity <= 1}
-                onClick={() => setQuantity((current) => Math.max(current - 1, 1))}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 px-6 py-4 font-black text-white shadow-lg shadow-orange-500/25 transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                disabled={addMutation.isPending}
+                onClick={handleAddToCart}
+                type="button"
               >
-                <Minus size={17} />
-              </button>
-              <span className="font-black text-slate-950">{quantity}</span>
-              <button
-                className="grid size-11 place-items-center rounded-xl bg-white text-slate-700 shadow-sm"
-                onClick={() => setQuantity((current) => current + 1)}
-              >
-                <Plus size={17} />
+                <ShoppingCart size={19} />
+                {addMutation.isPending ? 'Adding...' : 'Add to cart'}
               </button>
             </div>
-            <button
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 px-6 py-4 font-black text-white shadow-lg shadow-orange-500/25 transition hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-              disabled={addMutation.isPending}
-              onClick={handleAddToCart}
-            >
-              <ShoppingCart size={19} />
-              {addMutation.isPending ? 'Adding...' : 'Add to cart'}
-            </button>
-          </div>
+          ) : (
+            <p className="mt-8 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500">
+              Cart and ordering are available for customer accounts only.
+            </p>
+          )}
         </div>
       </div>
     </section>

@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
   ArrowRight,
@@ -16,13 +17,50 @@ import {
   Tag,
   Utensils,
 } from 'lucide-react'
-import { categories, faqs, offers, popularFoods, restaurants, reviews } from '../../data/homeData'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { categories, faqs, offers, restaurants, reviews } from '../../data/homeData'
+import { getFoods } from '../../services/foodService'
 
 const icons = { Coffee, Fish, IceCreamBowl, Pizza, Salad, Sandwich }
+
+const categoryRoutes = {
+  Pizza: 'Pizza',
+  Burgers: 'Burger',
+  Sushi: 'Sushi',
+  Desserts: 'Dessert',
+  Healthy: 'Healthy',
+  Coffee: 'Coffee',
+}
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
   visible: { opacity: 1, y: 0 },
+}
+
+function AnimatedNumber({ value }) {
+  const [display, setDisplay] = useState(0)
+
+  useEffect(() => {
+    if (!value) return undefined
+
+    let frame = 0
+    const totalFrames = 24
+    const step = value / totalFrames
+
+    const timer = window.setInterval(() => {
+      frame += 1
+      setDisplay(Math.min(Math.round(step * frame), value))
+
+      if (frame >= totalFrames) {
+        window.clearInterval(timer)
+      }
+    }, 30)
+
+    return () => window.clearInterval(timer)
+  }, [value])
+
+  return display
 }
 
 function SectionHeader({ eyebrow, title, text }) {
@@ -52,6 +90,29 @@ function Rating({ value }) {
 }
 
 export function HeroBanner() {
+  const navigate = useNavigate()
+  const [search, setSearch] = useState('')
+  const { data } = useQuery({
+    queryKey: ['home-stats'],
+    queryFn: () => getFoods({ page: 1, limit: 1 }),
+    staleTime: 1000 * 60 * 5,
+  })
+
+  const foodCount = data?.pagination?.total || 0
+  const categoryCount = data?.categories?.length || categories.length
+
+  function handleSearch(event) {
+    event.preventDefault()
+    const query = search.trim()
+
+    if (query) {
+      navigate(`/foods?search=${encodeURIComponent(query)}`)
+      return
+    }
+
+    navigate('/foods')
+  }
+
   return (
     <section className="overflow-hidden bg-white">
       <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8 lg:py-20">
@@ -65,18 +126,38 @@ export function HeroBanner() {
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
             Browse menus, unlock curated deals, and get hot meals delivered with a clean ordering experience built for speed.
           </p>
-          <div className="mt-8 flex max-w-xl flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-sm sm:flex-row">
+          <form className="mt-8 flex max-w-xl flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-sm sm:flex-row" onSubmit={handleSearch}>
             <label className="flex min-h-12 flex-1 items-center gap-3 rounded-xl bg-white px-4 text-slate-500">
               <Search size={19} />
-              <input className="w-full bg-transparent text-sm font-bold outline-none placeholder:text-slate-400" placeholder="Search pizza, sushi, burger..." />
+              <input
+                className="w-full bg-transparent text-sm font-bold outline-none placeholder:text-slate-400"
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search pizza, sushi, burger..."
+                value={search}
+              />
             </label>
-            <button className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-orange-500 px-5 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:bg-rose-600">
+            <button className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-orange-500 px-5 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition hover:bg-rose-600" type="submit">
               Find Food <ArrowRight size={17} />
             </button>
-          </div>
+          </form>
           <div className="mt-7 grid max-w-lg grid-cols-3 gap-3 text-sm font-bold text-slate-600">
-            {['800+ dishes', '120 partners', '24/7 support'].map((item) => (
-              <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 text-center shadow-sm" key={item}>{item}</div>
+            {[
+              [`${foodCount || '800'}+`, 'Live dishes'],
+              [`${categoryCount || '12'}+`, 'Categories'],
+              ['24/7', 'Support'],
+            ].map(([value, label]) => (
+              <div className="rounded-2xl border border-slate-200 bg-white px-3 py-3 text-center shadow-sm" key={label}>
+                <p className="text-lg font-black text-slate-950">
+                  {typeof value === 'string' && value.endsWith('+') && foodCount ? (
+                    <>
+                      <AnimatedNumber value={foodCount} />+
+                    </>
+                  ) : (
+                    value
+                  )}
+                </p>
+                <p className="mt-1 text-xs font-bold text-slate-500">{label}</p>
+              </div>
             ))}
           </div>
         </motion.div>
@@ -110,12 +191,19 @@ export function FoodCategories() {
       <div className="mx-auto grid max-w-7xl gap-4 sm:grid-cols-2 lg:grid-cols-6">
         {categories.map((category, index) => {
           const Icon = icons[category.icon]
+          const categoryParam = categoryRoutes[category.name] || category.name
+
           return (
-            <motion.button className="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-xl" key={category.name} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ delay: index * 0.04 }}>
-              <div className={`mb-5 grid size-12 place-items-center rounded-2xl ${category.color}`}><Icon size={24} /></div>
-              <p className="font-black text-slate-950">{category.name}</p>
-              <p className="mt-1 text-sm font-bold text-slate-500">{category.count}</p>
-            </motion.button>
+            <motion.div initial="hidden" key={category.name} transition={{ delay: index * 0.04 }} variants={fadeUp} viewport={{ once: true }} whileInView="visible">
+              <Link
+                className="block rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-orange-200 hover:shadow-xl"
+                to={`/foods?category=${encodeURIComponent(categoryParam)}`}
+              >
+                <div className={`mb-5 grid size-12 place-items-center rounded-2xl ${category.color}`}><Icon size={24} /></div>
+                <p className="font-black text-slate-950">{category.name}</p>
+                <p className="mt-1 text-sm font-bold text-slate-500">{category.count}</p>
+              </Link>
+            </motion.div>
           )
         })}
       </div>
@@ -124,29 +212,67 @@ export function FoodCategories() {
 }
 
 export function PopularFoods() {
+  const { data, isLoading } = useQuery({
+    queryKey: ['home-popular-foods'],
+    queryFn: () => getFoods({ page: 1, limit: 6 }),
+    staleTime: 1000 * 60 * 5,
+  })
+
+  const foods = data?.foods || []
+
   return (
     <section className="bg-white px-4 py-16 sm:px-6 lg:px-8">
-      <SectionHeader eyebrow="Popular" title="Most ordered dishes today" text="High-converting menu cards with price, timing, ratings, and strong food imagery." />
-      <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-3">
-        {popularFoods.map((food, index) => (
-          <motion.article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" key={food.name} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} transition={{ delay: index * 0.06 }}>
-            <div className="relative aspect-[4/3]">
-              <img className="h-full w-full object-cover" src={food.image} alt={food.name} />
-              <span className="absolute left-4 top-4 rounded-full bg-orange-500 px-3 py-1 text-xs font-black uppercase tracking-wide text-white">{food.tag}</span>
-            </div>
-            <div className="p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div><h3 className="text-xl font-black text-slate-950">{food.name}</h3><p className="mt-1 text-sm font-bold text-slate-500">{food.restaurant}</p></div>
-                <Rating value={food.rating} />
+      <SectionHeader eyebrow="Popular" title="Most ordered dishes today" text="Fresh picks loaded live from our menu — updated as new dishes are added." />
+      {isLoading ? (
+        <div className="mx-auto max-w-7xl rounded-3xl border border-slate-200 bg-slate-50 p-10 text-center font-bold text-slate-500">
+          Loading popular dishes...
+        </div>
+      ) : foods.length === 0 ? (
+        <div className="mx-auto max-w-7xl rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+          <h3 className="text-2xl font-black text-slate-950">Menu coming soon</h3>
+          <p className="mt-3 text-slate-600">Check back shortly or browse all foods.</p>
+          <Link className="mt-6 inline-flex rounded-2xl bg-orange-500 px-5 py-3 text-sm font-black text-white" to="/foods">
+            Browse Foods
+          </Link>
+        </div>
+      ) : (
+        <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {foods.map((food, index) => (
+            <motion.article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl" initial="hidden" key={food._id} transition={{ delay: index * 0.06 }} variants={fadeUp} viewport={{ once: true }} whileInView="visible">
+              <Link className="block" to={`/foods/${food._id}`}>
+                <div className="relative aspect-[4/3]">
+                  <img className="h-full w-full object-cover" src={food.image} alt={food.name} />
+                  <span className="absolute left-4 top-4 rounded-full bg-orange-500 px-3 py-1 text-xs font-black uppercase tracking-wide text-white">
+                    {food.category}
+                  </span>
+                </div>
+              </Link>
+              <div className="p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <Link className="text-xl font-black text-slate-950 transition hover:text-orange-600" to={`/foods/${food._id}`}>
+                      {food.name}
+                    </Link>
+                    <p className="mt-1 line-clamp-2 text-sm font-bold text-slate-500">{food.description}</p>
+                  </div>
+                  <Rating value="4.8" />
+                </div>
+                <div className="mt-5 flex items-center justify-between">
+                  <span className="text-lg font-black text-orange-600">${Number(food.price).toFixed(2)}</span>
+                  <span className="inline-flex items-center gap-1 text-sm font-bold text-slate-500"><Clock3 size={16} /> 25 min</span>
+                </div>
               </div>
-              <div className="mt-5 flex items-center justify-between">
-                <span className="text-lg font-black text-orange-600">{food.price}</span>
-                <span className="inline-flex items-center gap-1 text-sm font-bold text-slate-500"><Clock3 size={16} /> {food.time}</span>
-              </div>
-            </div>
-          </motion.article>
-        ))}
-      </div>
+            </motion.article>
+          ))}
+        </div>
+      )}
+      {foods.length > 0 && (
+        <div className="mx-auto mt-10 max-w-7xl text-center">
+          <Link className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-6 py-3 text-sm font-black text-white transition hover:bg-orange-600" to="/foods">
+            View full menu <ArrowRight size={16} />
+          </Link>
+        </div>
+      )}
     </section>
   )
 }

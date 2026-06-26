@@ -17,3 +17,27 @@ export function getRoleLabel(role) {
 
   return labels[role] || labels.customer
 }
+
+export function isCustomerRole(role) {
+  return role === 'customer'
+}
+
+export function isOwnerRole(role) {
+  return role === 'owner'
+}
+
+export function isAdminRole(role) {
+  return role === 'admin'
+}
+
+export function getNavbarPanel(role) {
+  if (!role) {
+    return null
+  }
+
+  return {
+    label: `${getRoleLabel(role)} Panel`,
+    to: getRoleHome(role),
+    end: role === 'customer',
+  }
+}

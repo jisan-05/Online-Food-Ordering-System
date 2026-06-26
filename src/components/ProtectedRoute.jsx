@@ -7,7 +7,7 @@ function ProtectedRoute({ allowedRoles, children }) {
   const { appUser, loading, user } = useAuth()
   const location = useLocation()
 
-  if (loading) {
+  if (loading || (user && !appUser)) {
     return <LoadingSpinner label="Checking authentication" />
   }
 
@@ -19,8 +19,8 @@ function ProtectedRoute({ allowedRoles, children }) {
     return <Navigate replace to="/login" />
   }
 
-  if (allowedRoles?.length && !allowedRoles.includes(appUser?.role)) {
-    return <Navigate replace to={getRoleHome(appUser?.role)} />
+  if (allowedRoles?.length && !allowedRoles.includes(appUser.role)) {
+    return <Navigate replace to={getRoleHome(appUser.role)} />
   }
 
   return children

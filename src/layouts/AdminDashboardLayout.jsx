@@ -1,6 +1,7 @@
 import { BarChart3, ClipboardList, LayoutDashboard, Menu, Soup, Store, UsersRound, X } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
+import useAuth from '../hooks/useAuth'
 
 const adminLinks = [
   { label: 'Dashboard', to: '/admin', icon: LayoutDashboard, end: true },
@@ -19,12 +20,14 @@ const linkClass = ({ isActive }) =>
   }`
 
 function AdminSidebar({ onNavigate }) {
+  const { user } = useAuth()
+
   return (
     <aside className="flex h-full flex-col">
       <div className="border-b border-slate-200 p-5">
         <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-500">Admin Panel</p>
-        <h2 className="mt-2 text-xl font-black text-slate-950">System Control</h2>
-        <p className="mt-1 text-sm font-bold text-slate-500">Platform management</p>
+        <h2 className="mt-2 text-xl font-black text-slate-950">{user?.displayName || 'Administrator'}</h2>
+        <p className="mt-1 truncate text-sm font-bold text-slate-500">{user?.email || 'Platform management'}</p>
       </div>
       <nav className="grid gap-2 p-4">
         {adminLinks.map(({ label, to, icon: Icon, end }) => (

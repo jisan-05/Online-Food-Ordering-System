@@ -2,16 +2,22 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Clock3, ShoppingCart, Star } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import useAuth from '../../hooks/useAuth'
+import useCartDrawer from '../../hooks/useCartDrawer'
 import { addToCart } from '../../services/cartService'
+import { isCustomerRole } from '../../utils/roles'
 
 function FoodCard({ food }) {
-  const { user } = useAuth()
+  const { appUser, user } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
+  const { openCart } = useCartDrawer()
   const queryClient = useQueryClient()
   const addMutation = useMutation({
     mutationFn: addToCart,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cart'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cart'] })
+      openCart()
+    },
   })
 
   function handleAddToCart() {
@@ -22,6 +28,8 @@ function FoodCard({ food }) {
 
     addMutation.mutate({ foodId: food._id, quantity: 1 })
   }
+
+  const canAddToCart = !user || isCustomerRole(appUser?.role)
 
   return (
     <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
@@ -58,13 +66,16 @@ function FoodCard({ food }) {
               <Clock3 size={14} />
               25 min
             </span>
-            <button
-              className="grid size-11 place-items-center rounded-full bg-slate-950 text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={addMutation.isPending}
-              onClick={handleAddToCart}
-            >
-              <ShoppingCart size={18} />
-            </button>
+            {canAddToCart && (
+              <button
+                className="grid size-11 place-items-center rounded-full bg-slate-950 text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={addMutation.isPending}
+                onClick={handleAddToCart}
+                type="button"
+              >
+                <ShoppingCart size={18} />
+              </button>
+            )}
           </div>
         </div>
       </div>

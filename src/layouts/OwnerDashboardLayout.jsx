@@ -27,7 +27,7 @@ const linkClass = ({ isActive }) =>
   }`
 
 function OwnerSidebar({ onNavigate }) {
-  const { user } = useAuth()
+  const { appUser, user } = useAuth()
 
   return (
     <aside className="flex h-full flex-col">
@@ -36,9 +36,12 @@ function OwnerSidebar({ onNavigate }) {
           Restaurant Owner
         </p>
         <h2 className="mt-2 text-xl font-black text-slate-950">
-          {user?.displayName || 'Owner Panel'}
+          {user?.displayName || 'Restaurant Owner'}
         </h2>
         <p className="mt-1 truncate text-sm font-bold text-slate-500">{user?.email}</p>
+        {appUser?.role && (
+          <p className="mt-2 text-xs font-black uppercase tracking-[0.14em] text-slate-400">{appUser.role}</p>
+        )}
       </div>
 
       <nav className="grid gap-2 p-4">
