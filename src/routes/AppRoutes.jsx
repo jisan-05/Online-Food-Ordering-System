@@ -13,7 +13,7 @@ const CartPage = lazy(() => import('../pages/dashboard/CartPage'))
 const CheckoutPage = lazy(() => import('../pages/dashboard/CheckoutPage'))
 const CustomerDashboardLayout = lazy(() => import('../layouts/CustomerDashboardLayout'))
 const DashboardHomePage = lazy(() => import('../pages/dashboard/DashboardHomePage'))
-const DashboardPlaceholderPage = lazy(() => import('../pages/dashboard/DashboardPlaceholderPage'))
+const WishlistPage = lazy(() => import('../pages/dashboard/WishlistPage'))
 const FoodDetailsPage = lazy(() => import('../pages/FoodDetailsPage'))
 const FoodsPage = lazy(() => import('../pages/FoodsPage'))
 const HomePage = lazy(() => import('../pages/HomePage'))
@@ -64,7 +64,7 @@ function AppRoutes() {
             <Route path="checkout" element={<CheckoutPage />} />
             <Route path="orders" element={<OrderHistoryPage />} />
             <Route path="orders/:id" element={<OrderDetailsPage />} />
-            <Route path="wishlist" element={<DashboardPlaceholderPage />} />
+            <Route path="wishlist" element={<WishlistPage />} />
           </Route>
           <Route
             path="owner"

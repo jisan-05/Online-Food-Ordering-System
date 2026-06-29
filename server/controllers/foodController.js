@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import Food from '../models/Food.js'
+import Review from '../models/Review.js'
 
 const allowedFields = ['name', 'image', 'category', 'price', 'description', 'restaurantId']
 
@@ -48,8 +49,32 @@ export async function getFoods(req, res, next) {
       Food.distinct('category'),
     ])
 
+    // Dynamic Review Stats aggregation for current page items
+    const foodIds = foods.map((f) => f._id)
+    const reviewStats = await Review.aggregate([
+      { $match: { foodId: { $in: foodIds } } },
+      { $group: { _id: '$foodId', averageRating: { $avg: '$rating' }, count: { $sum: 1 } } },
+    ])
+
+    const statsMap = reviewStats.reduce((map, item) => {
+      map[item._id.toString()] = {
+        averageRating: Number(item.averageRating.toFixed(1)),
+        count: item.count,
+      }
+      return map
+    }, {})
+
+    const foodsWithStats = foods.map((food) => {
+      const stats = statsMap[food._id.toString()] || { averageRating: 0, count: 0 }
+      return {
+        ...food.toObject(),
+        averageRating: stats.averageRating,
+        reviewCount: stats.count,
+      }
+    })
+
     return res.status(200).json({
-      foods,
+      foods: foodsWithStats,
       categories: categories.sort(),
       pagination: {
         page,
@@ -69,7 +94,7 @@ export async function getFoodById(req, res, next) {
       return res.status(400).json({ message: 'Invalid food id' })
     }
 
-    const food = await Food.findById(req.params.id)
+    const food = await Food.findById(req.params.id).populate('restaurantId')
 
     if (!food) {
       return res.status(404).json({ message: 'Food not found' })

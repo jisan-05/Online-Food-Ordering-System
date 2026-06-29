@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { seedDefaultCoupons } from '../controllers/couponController.js'
 
 const cached = global.mongoose ?? { conn: null, promise: null }
 
@@ -19,6 +20,7 @@ async function connectDB() {
     mongoose.set('strictQuery', true)
     cached.promise = mongoose.connect(process.env.MONGODB_URI).then((connection) => {
       console.log('MongoDB connected')
+      seedDefaultCoupons()
       return connection
     })
   }

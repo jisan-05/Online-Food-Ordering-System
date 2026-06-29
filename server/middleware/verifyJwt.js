@@ -28,6 +28,8 @@ async function verifyJwt(req, res, next) {
       email: user.email,
       role: user.role,
       status: user.status,
+      name: user.name,
+      photoURL: user.photoURL,
     }
 
     return next()

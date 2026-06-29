@@ -59,6 +59,21 @@ const orderSchema = new mongoose.Schema(
         message: 'Order must include at least one food item',
       },
     },
+    subtotalPrice: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    couponCode: {
+      type: String,
+      uppercase: true,
+      trim: true,
+    },
+    discountAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     totalPrice: {
       type: Number,
       required: true,

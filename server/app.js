@@ -7,6 +7,8 @@ import authRoutes from './routes/authRoutes.js'
 import cartRoutes from './routes/cartRoutes.js'
 import foodRoutes from './routes/foodRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
+import wishlistRoutes from './routes/wishlistRoutes.js'
+import couponRoutes from './routes/couponRoutes.js'
 import errorHandler from './middleware/errorHandler.js'
 
 const app = express()
@@ -69,6 +71,8 @@ app.use('/api/admin', adminRoutes)
 app.use('/api/cart', cartRoutes)
 app.use('/api/foods', foodRoutes)
 app.use('/api/orders', orderRoutes)
+app.use('/api/wishlist', wishlistRoutes)
+app.use('/api/coupons', couponRoutes)
 app.use(errorHandler)
 
 export default app

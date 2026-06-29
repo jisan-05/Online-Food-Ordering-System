@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import Cart from '../models/Cart.js'
 import Order from '../models/Order.js'
+import Coupon from '../models/Coupon.js'
 
 const orderStatuses = ['pending', 'confirmed', 'preparing', 'delivering', 'completed', 'cancelled']
 const paymentStatuses = ['unpaid', 'paid', 'failed', 'refunded']
@@ -11,6 +12,7 @@ function canAccessOrder(req, order) {
 
 export async function placeOrder(req, res, next) {
   try {
+    const { deliveryDetails, couponCode } = req.body
     const cartItems = await Cart.find({ userUid: req.user.uid }).populate('foodId')
 
     if (!cartItems.length) {
@@ -25,16 +27,34 @@ export async function placeOrder(req, res, next) {
       price: item.foodId.price,
       quantity: item.quantity,
     }))
-    const totalPrice = foods.reduce((total, food) => total + food.price * food.quantity, 0)
+
+    const subtotalPrice = foods.reduce((total, food) => total + food.price * food.quantity, 0)
+    let discountAmount = 0
+
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: couponCode.toUpperCase().trim(), isActive: true })
+      if (coupon) {
+        if (coupon.discountType === 'percentage') {
+          discountAmount = Number(((subtotalPrice * coupon.discountValue) / 100).toFixed(2))
+        } else if (coupon.discountType === 'fixed') {
+          discountAmount = Math.min(coupon.discountValue, subtotalPrice)
+        }
+      }
+    }
+
+    const totalPrice = Number((subtotalPrice - discountAmount).toFixed(2))
 
     const order = await Order.create({
       userId: req.user.uid,
       userEmail: req.user.email,
       foods,
+      subtotalPrice,
+      couponCode: couponCode ? couponCode.toUpperCase().trim() : undefined,
+      discountAmount,
       totalPrice,
       orderStatus: 'pending',
       paymentStatus: 'unpaid',
-      deliveryDetails: req.body.deliveryDetails,
+      deliveryDetails,
     })
 
     await Cart.deleteMany({ userUid: req.user.uid })
