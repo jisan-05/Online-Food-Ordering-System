@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Clock3, Heart, Minus, Plus, ShoppingCart, Star, Store, Tag } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
 import LoadingSpinner from '../components/LoadingSpinner'
 import useAuth from '../hooks/useAuth'
 import useCartDrawer from '../hooks/useCartDrawer'
@@ -70,6 +71,11 @@ function FoodDetailsPage() {
       queryClient.invalidateQueries({ queryKey: ['reviews', id] })
       setComment('')
       setRating(5)
+      toast.success('Review submitted successfully!')
+    },
+    onError: (err) => {
+      const errMsg = err?.response?.data?.message || 'Error submitting review.'
+      toast.error(errMsg)
     },
   })
 

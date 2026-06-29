@@ -4,7 +4,8 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import ProtectedRoute from '../components/ProtectedRoute'
 import MainLayout from '../layouts/MainLayout'
 
-const AdminAnalyticsPage = lazy(() => import('../pages/admin/AdminAnalyticsPage'))
+const AboutPage = lazy(() => import('../pages/AboutPage'))
+const ContactPage = lazy(() => import('../pages/ContactPage'))
 const AdminDashboardLayout = lazy(() => import('../layouts/AdminDashboardLayout'))
 const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'))
 const AdminFoodsPage = lazy(() => import('../pages/admin/AdminFoodsPage'))
@@ -40,6 +41,8 @@ function AppRoutes() {
           <Route index element={<HomePage />} />
           <Route path="foods" element={<FoodsPage />} />
           <Route path="foods/:id" element={<FoodDetailsPage />} />
+          <Route path="about" element={<AboutPage />} />
+          <Route path="contact" element={<ContactPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
           <Route
@@ -93,7 +96,6 @@ function AppRoutes() {
             <Route path="restaurants" element={<ManageRestaurantsPage />} />
             <Route path="foods" element={<AdminFoodsPage />} />
             <Route path="orders" element={<AdminOrdersPage />} />
-            <Route path="analytics" element={<AdminAnalyticsPage />} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Route>

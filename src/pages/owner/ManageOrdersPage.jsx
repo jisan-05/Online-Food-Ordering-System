@@ -49,6 +49,14 @@ function ManageOrdersPage() {
                   <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black uppercase text-orange-700">{order.orderStatus}</span>
                   <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black uppercase text-emerald-700">{order.paymentStatus}</span>
                 </div>
+                {order.deliveryDetails && (
+                  <div className="mt-4 max-w-sm rounded-2xl border border-slate-100 bg-slate-50 p-3.5 text-xs font-bold text-slate-600 shadow-inner">
+                    <p className="font-black text-slate-900 mb-1.5 uppercase tracking-wider text-[10px]">Delivery Details</p>
+                    <p className="text-slate-800"><span className="text-slate-400">Name:</span> {order.deliveryDetails.name || 'N/A'}</p>
+                    <p className="mt-0.5 text-slate-800"><span className="text-slate-400">Phone:</span> {order.deliveryDetails.phone || 'N/A'}</p>
+                    <p className="mt-1 text-slate-800"><span className="text-slate-400">Address:</span> {order.deliveryDetails.address || 'N/A'}</p>
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-wrap gap-2">

@@ -35,6 +35,14 @@ function AdminOrdersPage() {
               <h2 className="font-black text-slate-950">Order #{order._id.slice(-8).toUpperCase()}</h2>
               <p className="mt-1 text-sm font-bold text-slate-500">{order.userEmail} · {new Date(order.createdAt).toLocaleString()}</p>
               <p className="mt-2 font-black text-orange-600">${Number(order.totalPrice).toFixed(2)}</p>
+              {order.deliveryDetails && (
+                <div className="mt-3 max-w-sm rounded-2xl border border-slate-100 bg-slate-50 p-3.5 text-xs font-bold text-slate-600 shadow-inner">
+                  <p className="font-black text-slate-900 mb-1.5 uppercase tracking-wider text-[10px]">Delivery Details</p>
+                  <p className="text-slate-800"><span className="text-slate-400">Name:</span> {order.deliveryDetails.name || 'N/A'}</p>
+                  <p className="mt-0.5 text-slate-800"><span className="text-slate-400">Phone:</span> {order.deliveryDetails.phone || 'N/A'}</p>
+                  <p className="mt-1 text-slate-800"><span className="text-slate-400">Address:</span> {order.deliveryDetails.address || 'N/A'}</p>
+                </div>
+              )}
             </div>
             <div className="flex flex-wrap gap-2">
               <select className="min-h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-black outline-none" disabled={mutation.isPending} onChange={(event) => mutation.mutate({ id: order._id, payload: { orderStatus: event.target.value } })} value={order.orderStatus}>

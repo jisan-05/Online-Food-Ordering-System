@@ -59,6 +59,14 @@ function AuthProvider({ children }) {
     setAppUser(null)
   }
 
+  const updateUserProfile = async ({ name, photoURL }) => {
+    if (!auth.currentUser) return
+    await updateProfile(auth.currentUser, { displayName: name, photoURL })
+    const result = await syncJwt(auth.currentUser)
+    setUser({ ...auth.currentUser })
+    return result
+  }
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       try {
@@ -78,7 +86,7 @@ function AuthProvider({ children }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, appUser, loading, login, register, loginWithGoogle, logout }),
+    () => ({ user, appUser, loading, login, register, loginWithGoogle, logout, updateUserProfile }),
     [user, appUser, loading],
   )
 

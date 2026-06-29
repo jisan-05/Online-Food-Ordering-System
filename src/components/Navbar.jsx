@@ -50,13 +50,13 @@ function Navbar() {
       <NavLink className={linkClass} onClick={closeMenu} to="/foods">
         Foods
       </NavLink>
+      <NavLink className={linkClass} onClick={closeMenu} to="/about">
+        About
+      </NavLink>
       {user && !loading && panel && (
-        <>
-          <NavLink className={linkClass} end={panel.end} onClick={closeMenu} to={panel.to}>
-            {panel.label}
-          </NavLink>
-          
-        </>
+        <NavLink className={linkClass} end={panel.end} onClick={closeMenu} to={panel.to}>
+          {panel.label}
+        </NavLink>
       )}
     </>
   )

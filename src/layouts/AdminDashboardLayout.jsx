@@ -1,4 +1,4 @@
-import { BarChart3, ClipboardList, LayoutDashboard, Menu, Soup, Store, UsersRound, X } from 'lucide-react'
+import { ClipboardList, LayoutDashboard, Menu, Soup, Store, UsersRound, X } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import useAuth from '../hooks/useAuth'
@@ -9,7 +9,6 @@ const adminLinks = [
   { label: 'Manage Restaurants', to: '/admin/restaurants', icon: Store },
   { label: 'Manage Foods', to: '/admin/foods', icon: Soup },
   { label: 'Manage Orders', to: '/admin/orders', icon: ClipboardList },
-  { label: 'Analytics', to: '/admin/analytics', icon: BarChart3 },
 ]
 
 const linkClass = ({ isActive }) =>
